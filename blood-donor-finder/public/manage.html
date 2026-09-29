@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#b3122e">
+  <title>Your donor profile · Blood Donor Finder</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/manage.js"></script>
+</head>
+<body>
+<main class="container">
+  <h1>Your donor profile</h1>
+  <div id="message"></div>
+  <div id="profile" hidden>
+    <div class="card row between">
+      <div>
+        <h3 id="availability-title"></h3>
+        <p class="muted small" id="availability-text" style="margin:0"></p>
+      </div>
+      <button type="button" id="toggle-available"></button>
+    </div>
+    <form id="edit" class="card stack" novalidate>
+      <h2 style="margin:0">Details</h2>
+      <p class="muted small" id="email-line" style="margin:0"></p>
+      <label>Full name <input name="name" required maxlength="100"></label>
+      <div class="row">
+        <label style="flex:1 1 160px">Phone <input name="phone" type="tel"></label>
+        <label style="flex:1 1 120px">Blood group <select name="bloodGroup" required></select></label>
+        <label style="flex:1 1 120px"><span id="postal-label">PIN code</span> <input name="postalCode" inputmode="numeric" required></label>
+      </div>
+      <label>Last donation date <input name="lastDonationDate" type="date"></label>
+      <div id="edit-message"></div>
+      <div><button type="submit">Save changes</button></div>
+    </form>
+    <h2>Recent requests</h2>
+    <p class="muted small">Respond to requests using the link in each request email.</p>
+    <div id="requests"></div>
+    <h2>Delete profile</h2>
+    <div class="card">
+      <p class="small">This removes your profile and request history permanently.</p>
+      <button type="button" class="danger" id="delete">Delete my profile</button>
+    </div>
+  </div>
+</main>
+</body>
+</html>

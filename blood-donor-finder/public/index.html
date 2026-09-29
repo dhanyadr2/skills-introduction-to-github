@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#b3122e">
+  <title>Blood Donor Finder</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/search.js"></script>
+</head>
+<body>
+<main class="container">
+  <h1>Find blood donors near you</h1>
+  <p class="muted">Search blood banks and registered donors around a PIN code (India) or ZIP code (US).</p>
+
+  <form id="search" class="card grid" novalidate>
+    <label>Country
+      <select name="country" required></select>
+    </label>
+    <label><span id="postal-label">PIN code</span>
+      <input name="postalCode" inputmode="numeric" autocomplete="postal-code" required>
+    </label>
+    <label>Blood group needed
+      <select name="bloodGroup"><option value="">Any</option></select>
+    </label>
+    <label>Within
+      <select name="radius"></select>
+    </label>
+    <label class="check"><input type="checkbox" name="compatible" checked> Include compatible donors</label>
+    <button type="submit">Search</button>
+  </form>
+
+  <div id="message"></div>
+
+  <section id="results" hidden>
+    <p id="summary" class="muted"></p>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-donors" aria-selected="true" aria-controls="donors">Donors</button>
+      <button type="button" role="tab" id="tab-banks" aria-selected="false" aria-controls="banks">Blood banks</button>
+    </div>
+    <div id="donors" role="tabpanel" aria-labelledby="tab-donors"></div>
+    <div id="banks" role="tabpanel" aria-labelledby="tab-banks" hidden></div>
+  </section>
+</main>
+
+<dialog id="request-dialog" aria-labelledby="request-title">
+  <form id="request-form" class="stack" method="dialog" novalidate>
+    <div>
+      <h2 id="request-title" style="margin:0">Request contact</h2>
+      <p class="muted small" id="request-sub"></p>
+    </div>
+    <p class="small muted">The donor gets an email with your request. If they accept, you'll both receive each other's
+      phone and email. Your details are not shown to anyone else.</p>
+    <label>Your name <input name="seekerName" autocomplete="name" required maxlength="100"></label>
+    <div class="row">
+      <label style="flex:1 1 200px">Your email <input name="seekerEmail" type="email" autocomplete="email" required></label>
+      <label style="flex:1 1 160px">Your phone <input name="seekerPhone" type="tel" autocomplete="tel" required></label>
+    </div>
+    <div class="row">
+      <label style="flex:1 1 120px">Patient's blood group <select name="bloodGroup" required></select></label>
+      <label style="flex:1 1 80px">Units needed <input name="units" type="number" min="1" max="10" value="1" required></label>
+    </div>
+    <label>Needed <select name="urgency" required></select></label>
+    <label>Hospital / location <input name="hospital" required maxlength="200" placeholder="Hospital name and area"></label>
+    <label>Message (optional) <textarea name="message" maxlength="1000"></textarea></label>
+    <div id="request-message"></div>
+    <div class="row between">
+      <button type="button" class="secondary" id="request-cancel">Cancel</button>
+      <button type="submit" id="request-submit">Send request</button>
+    </div>
+  </form>
+</dialog>
+</body>
+</html>

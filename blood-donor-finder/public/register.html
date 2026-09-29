@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#b3122e">
+  <title>Become a donor · Blood Donor Finder</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/register.js"></script>
+</head>
+<body>
+<main class="container">
+  <h1>Become a blood donor</h1>
+  <p class="muted">Register so people nearby can ask you for help. Your phone and email stay private until you accept a request.</p>
+  <form id="register" class="card stack" novalidate>
+    <label>Full name <input name="name" autocomplete="name" required maxlength="100"></label>
+    <div class="row">
+      <label style="flex:1 1 220px">Email <input name="email" type="email" autocomplete="email" required></label>
+      <label style="flex:1 1 180px">Phone (shared only if you accept) <input name="phone" type="tel" autocomplete="tel"></label>
+    </div>
+    <div class="row">
+      <label style="flex:1 1 160px">Blood group <select name="bloodGroup" required><option value="">Choose…</option></select></label>
+      <label style="flex:1 1 160px">Country <select name="country" required></select></label>
+      <label style="flex:1 1 160px"><span id="postal-label">PIN code</span> <input name="postalCode" inputmode="numeric" autocomplete="postal-code" required></label>
+    </div>
+    <label>Last donation date (optional)
+      <input name="lastDonationDate" type="date">
+      <span class="muted small" id="eligibility-hint"></span>
+    </label>
+    <label class="check"><input type="checkbox" name="consent" required>
+      <span>I agree to be contacted by email about blood requests near me. Only my first name, blood group and approximate
+        area are shown in search. I can pause or delete my profile at any time.</span></label>
+    <div id="message"></div>
+    <div><button type="submit">Register</button></div>
+  </form>
+  <p class="small muted">Already registered? <a href="#" id="resend">Email me a link to manage my profile</a>.</p>
+</main>
+</body>
+</html>
