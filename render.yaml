@@ -1,0 +1,20 @@
+# Render Blueprint for the Blood Donor Finder demo (blood-donor-finder/).
+# Render dashboard -> New -> Blueprint -> pick this repository and branch.
+services:
+  - type: web
+    name: blood-donor-finder
+    runtime: node
+    plan: free
+    rootDir: blood-donor-finder
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/meta
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Render's load balancer sits in front of the app; use X-Forwarded-For for rate limits.
+      - key: TRUST_PROXY
+        value: "true"
+      # Password for /dev/outbox (see it under the service's Environment tab).
+      - key: OUTBOX_PASSWORD
+        generateValue: true

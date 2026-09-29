@@ -5,11 +5,23 @@ if (existsSync('.env')) process.loadEnvFile('.env');
 const env = process.env;
 const bool = (value, fallback) => (value === undefined || value === '' ? fallback : /^(1|true|yes)$/i.test(value));
 
+function parseTrustProxy(value) {
+  if (!value) return 'loopback';
+  if (/^(true|false)$/i.test(value)) return value.toLowerCase() === 'true';
+  return /^\d+$/.test(value) ? Number(value) : value;
+}
+
 export function loadConfig(overrides = {}) {
   const port = Number(env.PORT || 3000);
   return {
     port,
-    baseUrl: (env.BASE_URL || `http://localhost:${port}`).replace(/\/$/, ''),
+    // RENDER_EXTERNAL_URL is set automatically on Render.
+    baseUrl: (env.BASE_URL || env.RENDER_EXTERNAL_URL || `http://localhost:${port}`).replace(/\/$/, ''),
+    // Set when running behind a reverse proxy/load balancer so rate limits see the real client IP:
+    // "true" (trust X-Forwarded-For), a hop count like "1", or Express's named values.
+    trustProxy: parseTrustProxy(env.TRUST_PROXY),
+    // When set, /dev/outbox asks for this password (any username).
+    outboxPassword: env.OUTBOX_PASSWORD || null,
     dbPath: env.DB_PATH || './data/app.db',
     production: env.NODE_ENV === 'production',
     seedDemo: bool(env.SEED_DEMO, true),

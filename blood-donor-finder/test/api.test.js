@@ -202,3 +202,23 @@ describe('masked contact requests', () => {
     assert.equal((await call('/api/requests/respond', { method: 'POST', headers, body: { action: 'accept' } })).status, 409);
   });
 });
+
+describe('dev outbox password and proxy IPs', () => {
+  test('outbox requires the password when one is set, and trust proxy is configurable', async () => {
+    const outDb = openDb(':memory:');
+    const config = loadConfig({ outboxPassword: 's3cret', trustProxy: true, rateLimit: false, production: false });
+    const app = createApp({ db: outDb, mailer: { send: async () => {} }, config });
+    assert.equal(app.get('trust proxy'), true);
+    const srv = app.listen(0);
+    await new Promise((resolve) => srv.once('listening', resolve));
+    const url = `http://127.0.0.1:${srv.address().port}/dev/outbox`;
+    const auth = (pw) => ({ authorization: `Basic ${Buffer.from(`admin:${pw}`).toString('base64')}` });
+    try {
+      assert.equal((await fetch(url)).status, 401);
+      assert.equal((await fetch(url, { headers: auth('wrong') })).status, 401);
+      assert.equal((await fetch(url, { headers: auth('s3cret') })).status, 200);
+    } finally {
+      srv.close();
+    }
+  });
+});

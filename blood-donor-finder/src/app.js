@@ -1,4 +1,5 @@
 import express from 'express';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import {
   BLOOD_GROUPS,
@@ -106,11 +107,14 @@ function rateLimiter({ windowMs, max }) {
   };
 }
 
+const digest = (value) => createHash('sha256').update(value).digest();
+const safeEqual = (a, b) => timingSafeEqual(digest(a), digest(b));
+
 // ---------- app ----------
 
 export function createApp({ db, mailer, config }) {
   const app = express();
-  app.set('trust proxy', 'loopback');
+  app.set('trust proxy', config.trustProxy ?? 'loopback');
   app.use(express.json({ limit: '20kb' }));
   app.use(express.static(PUBLIC_DIR));
 
@@ -529,7 +533,14 @@ export function createApp({ db, mailer, config }) {
   // ----- development outbox -----
 
   if (!config.production) {
-    app.get('/dev/outbox', (_req, res) => {
+    app.get('/dev/outbox', (req, res) => {
+      if (config.outboxPassword) {
+        const [scheme, encoded] = (req.get('authorization') ?? '').split(' ');
+        const password = scheme === 'Basic' && encoded ? Buffer.from(encoded, 'base64').toString().split(':').slice(1).join(':') : '';
+        if (!safeEqual(password, config.outboxPassword)) {
+          return res.set('WWW-Authenticate', 'Basic realm="Dev outbox"').status(401).send('Password required.');
+        }
+      }
       const esc = (s) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
       const linkify = (s) => esc(s).replace(/https?:\/\/\S+/g, (u) => `<a href="${u}">${u}</a>`);
       const mails = db.prepare('SELECT * FROM outbox ORDER BY id DESC LIMIT 50').all();

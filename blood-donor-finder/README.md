@@ -49,6 +49,22 @@ npm test                 # unit and API tests (node:test)
 npm run seed -- --reset  # wipe banks/donors/requests and reload demo data
 ```
 
+## Host it on Render (free, open it from your phone)
+
+The repository root has a `render.yaml` Blueprint that sets everything up.
+
+1. Sign up at [render.com](https://render.com) with **GitHub**, and allow Render to access this repository.
+2. In the Render dashboard, choose **New → Blueprint**, pick this repository and the branch that contains
+   `render.yaml`, then **Apply**.
+3. When the deploy is live, open the `https://….onrender.com` link on your phone. Use **Add to Home Screen** to open
+   it like an app.
+4. Emails are in `https://….onrender.com/dev/outbox`. Enter any username, and use the `OUTBOX_PASSWORD` shown under
+   the service's **Environment** tab.
+
+Free-plan notes: the app sleeps after about 15 minutes idle and takes about 30 seconds to wake. Its SQLite file is
+wiped on every restart or redeploy, which puts the demo data back and removes anything added since. Email links use
+Render's `RENDER_EXTERNAL_URL` automatically.
+
 ## Real data
 
 ### Postal codes (any PIN / ZIP)
