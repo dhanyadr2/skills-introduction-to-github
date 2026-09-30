@@ -46,7 +46,8 @@ demo donors around each. Demo records are labelled "Demo data" in the UI. Try PI
 
 ```bash
 npm test                 # unit and API tests (node:test)
-npm run seed -- --reset  # wipe banks/donors/requests and reload demo data
+npm run seed -- --reset        # wipe banks/donors/requests and reload demo data
+npm run seed -- --remove-demo  # delete only demo banks/donors (set SEED_DEMO=false too)
 ```
 
 ## Host it on Render (free, open it from your phone)
@@ -98,7 +99,11 @@ Column names are matched case-insensitively (`name`/`blood bank name`, `address`
 `pincode`/`zip`, `phone`/`contact no`, `website`, `latitude`, `longitude`). You can also add one column per blood
 group (`A+`, `O-`, …) with units in stock. Rows without coordinates are placed at their postal code's centre.
 `--replace` first deletes that country's banks from the same `--source`. To remove the demo data, run
-`npm run seed -- --reset` before importing, or delete rows where `is_sample = 1`.
+`npm run seed -- --remove-demo` and set `SEED_DEMO=false` in `.env`.
+
+After an import, check the `Imported … / Skipped …` lines. If most rows were skipped, the file's column names
+don't match the list above: rename the header row, or add the new names to `ALIASES` in
+`scripts/import-blood-banks.js`.
 
 ## How it's built
 
