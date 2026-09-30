@@ -14,7 +14,8 @@
     "seed": "node --disable-warning=ExperimentalWarning scripts/seed.js",
     "import:postal": "node --disable-warning=ExperimentalWarning scripts/import-postal-codes.js",
     "import:banks": "node --disable-warning=ExperimentalWarning scripts/import-blood-banks.js",
-    "test": "node --disable-warning=ExperimentalWarning --test \"test/*.test.js\""
+    "test": "node --disable-warning=ExperimentalWarning --test \"test/*.test.js\"",
+    "sync:banks": "node --disable-warning=ExperimentalWarning scripts/sync-blood-banks.js"
   },
   "dependencies": {
     "express": "^5.2.1",

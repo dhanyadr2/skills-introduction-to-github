@@ -18,3 +18,8 @@ services:
       # Password for /dev/outbox (see it under the service's Environment tab).
       - key: OUTBOX_PASSWORD
         generateValue: true
+      # Optional: India's blood bank directory from data.gov.in (Render asks for these values).
+      - key: DATA_GOV_IN_API_KEY
+        sync: false
+      - key: DATA_GOV_IN_RESOURCE_ID
+        sync: false

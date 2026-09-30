@@ -13,7 +13,7 @@ const mails = [];
 before(async () => {
   db = openDb(':memory:');
   seedPostalCodes(db);
-  const config = loadConfig({ baseUrl: 'http://app.test', geocoderRemote: false, rateLimit: false, production: false });
+  const config = loadConfig({ baseUrl: 'http://app.test', geocoderRemote: false, osmLive: false, rateLimit: false, production: false });
   const mailer = { send: async (m) => void mails.push(m) };
   server = createApp({ db, mailer, config }).listen(0);
   await new Promise((resolve) => server.once('listening', resolve));

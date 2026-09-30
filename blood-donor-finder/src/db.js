@@ -75,6 +75,12 @@ CREATE TABLE IF NOT EXISTS requests (
 CREATE INDEX IF NOT EXISTS requests_donor ON requests (donor_id, created_at);
 CREATE INDEX IF NOT EXISTS requests_seeker ON requests (seeker_email, created_at);
 
+CREATE TABLE IF NOT EXISTS source_cache (
+  key        TEXT PRIMARY KEY,
+  fetched_at TEXT NOT NULL,
+  data       TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS outbox (
   id         INTEGER PRIMARY KEY,
   to_addr    TEXT NOT NULL,

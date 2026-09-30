@@ -14,6 +14,7 @@ import {
 } from './blood.js';
 import { nowIso, transaction } from './db.js';
 import { boundingBox, distanceKm, fromKm, geocodePostal, toKm } from './geo.js';
+import { openStreetMapBanks } from './sources/openstreetmap.js';
 import { hashToken, newPublicId, newToken } from './tokens.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public', import.meta.url));
@@ -181,7 +182,24 @@ export function createApp({ db, mailer, config }) {
         `SELECT * FROM blood_banks
          WHERE country = ? AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?`,
       )
-      .all(...boxParams);
+      .all(...boxParams)
+      .map((b) => ({ ...b, source: b.is_sample ? 'demo' : b.source }));
+    let liveSourceFailed = false;
+    if (config.osmLive) {
+      const osm = await openStreetMapBanks(db, {
+        cacheKey: `${c}:${code}:${radius}`,
+        lat: origin.lat,
+        lng: origin.lng,
+        radiusKm,
+        fetchImpl: config.fetchImpl,
+      });
+      liveSourceFailed = !osm.ok;
+      // Skip OpenStreetMap entries that duplicate a bank we already have (within ~200 m).
+      const fresh = osm.banks.filter(
+        (o) => !bankRows.some((b) => distanceKm(o.lat, o.lng, b.lat, b.lng) < 0.2),
+      );
+      bankRows.push(...fresh.map((o) => ({ ...o, source: 'openstreetmap' })));
+    }
     const banks = within(bankRows)
       .sort((a, b) => a.km - b.km)
       .slice(0, MAX_RESULTS)
@@ -194,10 +212,12 @@ export function createApp({ db, mailer, config }) {
         postalCode: b.postal_code,
         phone: b.phone,
         website: b.website,
+        openingHours: b.opening_hours ?? null,
         distance: round1(b.km),
         stock: b.stock_json ? JSON.parse(b.stock_json) : null,
-        stockUpdatedAt: b.stock_updated_at,
-        isSample: Boolean(b.is_sample),
+        stockUpdatedAt: b.stock_updated_at ?? null,
+        source: b.source,
+        isSample: b.source === 'demo',
       }));
 
     const groups = group ? donorGroupsFor(group, includeCompatible) : BLOOD_GROUPS;
@@ -233,6 +253,7 @@ export function createApp({ db, mailer, config }) {
       includeCompatible,
       banks,
       donors,
+      liveSourceFailed,
     });
   });
 

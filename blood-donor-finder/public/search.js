@@ -121,8 +121,9 @@ function render(r) {
             h('div', { class: 'row small', style: 'margin-top:6px' },
               b.phone ? h('a', { href: `tel:${b.phone.replace(/[^\d+]/g, '')}` }, `Call ${b.phone}`) : null,
               b.website ? h('a', { href: b.website, target: '_blank', rel: 'noopener' }, 'Website') : null,
-              b.isSample ? h('span', { class: 'pill' }, 'Demo data') : null,
+              h('span', { class: 'pill' }, SOURCE_LABEL[b.source] ?? b.source),
             ),
+            b.openingHours ? h('div', { class: 'muted small', style: 'margin-top:4px' }, `Hours: ${b.openingHours}`) : null,
             b.stock
               ? h('div', {},
                   h('div', { class: 'stock' },
@@ -136,11 +137,24 @@ function render(r) {
           ),
         )
       : [emptyState('No blood banks found in this area.', 'Try a larger distance.')]),
+    r.liveSourceFailed
+      ? h('div', { class: 'notice warn small' }, "Couldn't reach OpenStreetMap just now, so some blood banks may be missing. Try again shortly.")
+      : null,
+    r.banks.some((b) => b.source === 'openstreetmap')
+      ? h('p', { class: 'muted small' }, 'Some listings: © ', h('a', { href: 'https://www.openstreetmap.org/copyright', target: '_blank', rel: 'noopener' }, 'OpenStreetMap contributors'), '.')
+      : null,
   );
 
   results.hidden = false;
   selectTab(r.donors.length || !r.banks.length ? 'donors' : 'banks');
 }
+
+const SOURCE_LABEL = {
+  demo: 'Demo data',
+  openstreetmap: 'OpenStreetMap',
+  'data.gov.in': 'data.gov.in',
+  csv: 'Imported',
+};
 
 const emptyState = (title, hint) => h('div', { class: 'card' }, h('h3', {}, title), h('p', { class: 'muted small' }, hint));
 

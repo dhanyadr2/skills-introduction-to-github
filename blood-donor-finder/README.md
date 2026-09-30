@@ -82,28 +82,41 @@ npm run import:postal -- US.txt IN.txt
 ### Blood banks
 
 Blood banks don't publish donors' personal details, so donors come only from people who sign up here. Blood bank
-**locations** can be imported from public directories:
+**locations** come from three sources, and search results label each listing with its source:
 
-- **India:** the *Blood Bank Directory* on [data.gov.in](https://data.gov.in) (National Health Portal) includes names,
-  addresses, PIN codes, phone numbers and coordinates. Live stock is shown on
-  [e-RaktKosh](https://eraktkosh.mohfw.gov.in); ask them about access before building an integration.
-- **United States:** there's no single open directory. Use lists from regional blood centres, the American Red Cross,
-  or America's Blood Centers, with their permission.
+1. **OpenStreetMap (live, automatic, India + US).** Every search asks the free
+   [Overpass API](https://overpass-api.de) for places tagged `healthcare=blood_donation` or `healthcare=blood_bank`
+   within the search radius. It needs no setup or key. Results are cached for 24 hours per postal code and radius,
+   and listings within about 200 m of a bank you already have are hidden as duplicates. If Overpass can't be
+   reached, search still works and shows a notice. Turn it off with `OSM_LIVE=false`. Coverage depends on what
+   volunteers have mapped: it's good for Red Cross and Vitalant centres in US cities and patchier in India. Data
+   © OpenStreetMap contributors (ODbL); the page shows this credit.
+2. **data.gov.in API (automatic, India).** The Blood Bank Directory from India's Open Government Data platform is
+   downloaded when the server starts and then once a day. Set up:
+   - Sign in at [data.gov.in](https://data.gov.in) and copy your **API key** from *My Account*.
+   - Open the *Blood Bank Directory* dataset. Its API link looks like
+     `https://api.data.gov.in/resource/<resource-id>`; copy the `<resource-id>`.
+   - Put both in `.env` as `DATA_GOV_IN_API_KEY` and `DATA_GOV_IN_RESOURCE_ID`, then restart. Run
+     `npm run sync:banks` to download straight away and see how many banks were loaded.
+   A failed or empty download never wipes the copy you already have. If most records are skipped, `sync:banks`
+   prints the field names it received: add unfamiliar ones to `ALIASES` in `src/bank-import.js`.
+3. **CSV import (manual, any country).** For lists you get from blood centres:
 
 ```bash
-npm run import:banks -- --country IN blood-bank-directory.csv --source data.gov.in
 npm run import:banks -- --country US us-centers.csv --source my-list --replace
 ```
 
-Column names are matched case-insensitively (`name`/`blood bank name`, `address`, `city`/`district`, `state`,
-`pincode`/`zip`, `phone`/`contact no`, `website`, `latitude`, `longitude`). You can also add one column per blood
-group (`A+`, `O-`, …) with units in stock. Rows without coordinates are placed at their postal code's centre.
-`--replace` first deletes that country's banks from the same `--source`. To remove the demo data, run
-`npm run seed -- --remove-demo` and set `SEED_DEMO=false` in `.env`.
+Column names are matched loosely: case, spaces and underscores are ignored (`name`/`blood bank name`, `address`,
+`city`/`district`, `state`, `pincode`/`zip`, `phone`/`contact no`, `website`, `latitude`, `longitude`). You can
+also add one column per blood group (`A+`, `O-`, …) with units in stock. Rows without coordinates are placed at
+their postal code's centre. `--replace` first deletes that country's banks from the same `--source`, and keeps
+them if no row could be imported.
 
-After an import, check the `Imported … / Skipped …` lines. If most rows were skipped, the file's column names
-don't match the list above: rename the header row, or add the new names to `ALIASES` in
-`scripts/import-blood-banks.js`.
+To remove the demo data, run `npm run seed -- --remove-demo` and set `SEED_DEMO=false` in `.env`.
+
+**Live stock levels** (units of each group) aren't available from any of these sources. In India they're shown on
+[e-RaktKosh](https://eraktkosh.mohfw.gov.in), which has no public API; showing them here would need an agreement
+with its operators. Until then, listings say "call to check availability", unless a CSV includes stock columns.
 
 ## How it's built
 
@@ -115,8 +128,10 @@ src/
   geo.js         distance, bounding box, postal-code lookup (local table -> zippopotam.us)
   db.js          SQLite schema (node:sqlite)
   mailer.js      SMTP via nodemailer, plus an outbox table for development
+  bank-import.js maps blood bank rows (CSV or API) to the database
+  sources/       live sources: openstreetmap.js (Overpass), datagovin.js (data.gov.in API)
   seed.js        demo postal codes, banks and donors
-scripts/         seed, import-postal-codes, import-blood-banks
+scripts/         seed, import-postal-codes, import-blood-banks, sync-blood-banks
 public/          static pages (plain HTML/CSS/JS, no build step)
 test/            node:test unit and API tests
 ```

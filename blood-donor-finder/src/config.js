@@ -26,6 +26,13 @@ export function loadConfig(overrides = {}) {
     production: env.NODE_ENV === 'production',
     seedDemo: bool(env.SEED_DEMO, true),
     geocoderRemote: bool(env.GEOCODER_REMOTE, true),
+    // Look up blood banks live from OpenStreetMap on each search (cached for 24h).
+    osmLive: bool(env.OSM_LIVE, true),
+    // India blood bank directory from the data.gov.in API, refreshed daily when both are set.
+    dataGovIn:
+      env.DATA_GOV_IN_API_KEY && env.DATA_GOV_IN_RESOURCE_ID
+        ? { apiKey: env.DATA_GOV_IN_API_KEY, resourceId: env.DATA_GOV_IN_RESOURCE_ID }
+        : null,
     smtp: env.SMTP_HOST
       ? {
           host: env.SMTP_HOST,
